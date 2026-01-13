@@ -1,5 +1,4 @@
 import datetime
-
 from typing import Dict
 
 from ..utils import hash_password

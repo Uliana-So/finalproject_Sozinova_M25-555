@@ -1,14 +1,14 @@
 from datetime import datetime
-from pathlib import Path
-from datetime import datetime
-from typing import Optional, List
+from typing import List, Optional
 
 from ...core.models.user import User
-from ..storage import FileStorageManager
 from ...core.utils import generate_salt, hash_password
+from ..storage import FileStorageManager
 
 
 class UserManager:
+    """Менеджер пользователей."""
+
     def __init__(self, file_path: str):
         self._storage = FileStorageManager(file_path)
         self._users : List[User] = []
@@ -28,7 +28,7 @@ class UserManager:
     def create(self, username: str, password: str) -> User:
         """Создаёт и добавляет нового пользователя."""
         if self.get_by_username(username):
-            raise ValueError(f"Имя пользователя {username} уже занято")
+            raise ValueError(f'Имя пользователя {username} уже занято.')
 
         if len(password) < 4:
             raise ValueError('Пароль должен быть не короче 4 символов.')
@@ -57,11 +57,11 @@ class UserManager:
         """Аутентификация пользователя."""
         user = self.get_by_username(username)
         if user is None:
-            raise ValueError("Неверный логин или пароль")
+            raise ValueError('Неверный логин или пароль.')
 
         hashed_input = hash_password(password, user._salt)
         if hashed_input != user._hashed_password:
-            raise ValueError("Неверный логин или пароль")
+            raise ValueError('Неверный логин или пароль.')
 
         return user
 
@@ -78,23 +78,23 @@ class UserManager:
     @staticmethod
     def _deserialize(data: dict) -> User:
         return User(
-            user_id=data["user_id"],
-            username=data["username"],
-            hashed_password=data["hashed_password"],
-            salt=data["salt"],
+            user_id=data['user_id'],
+            username=data['username'],
+            hashed_password=data['hashed_password'],
+            salt=data['salt'],
             registration_date=datetime.fromisoformat(
-                data["registration_date"]
+                data['registration_date']
             ),
         )
 
     def _serialize(self) -> list[dict]:
         return [
             {
-                "user_id": user._user_id,
-                "username": user._username,
-                "hashed_password": user._hashed_password,
-                "salt": user._salt,
-                "registration_date": user._registration_date.isoformat(),
+                'user_id': user._user_id,
+                'username': user._username,
+                'hashed_password': user._hashed_password,
+                'salt': user._salt,
+                'registration_date': user._registration_date.isoformat(),
             }
             for user in self._users
         ]

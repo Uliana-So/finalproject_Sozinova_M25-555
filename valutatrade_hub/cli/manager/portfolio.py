@@ -3,6 +3,7 @@ from typing import Dict, Optional
 
 from ...core.models.portfolio import Portfolio
 from ...core.models.wallet import Wallet
+from ...core.utils import format_balance
 from ..storage import FileStorageManager
 
 
@@ -15,14 +16,13 @@ class PortfolioManager:
         self._load()
 
     def get_by_user_id(self, user_id: int) -> Optional[Portfolio]:
-        print(self._portfolios)
         return self._portfolios.get(user_id)
 
     def create_portfolio(self, user_id: int) -> Portfolio:
         if user_id in self._portfolios:
             raise ValueError("Portfolio already exists for this user")
 
-        portfolio = Portfolio(user_id=user_id)
+        portfolio = Portfolio(user_id)
         self._portfolios[user_id] = portfolio
         self.save()
         return portfolio
@@ -32,6 +32,7 @@ class PortfolioManager:
         return portfolio.add_currency(currency_code)
     
     def save(self) -> None:
+        """Сохраняет текущее состояние в файл."""
         self._storage.save(self._serialize())
 
     def _get_or_create(self, user_id: int) -> Portfolio:
@@ -44,9 +45,9 @@ class PortfolioManager:
         raw = self._storage.load()
 
         for item in raw:
-            portfolio = Portfolio(item["user_id"])
+            portfolio = Portfolio(item['user_id'])
 
-            for code, balance in item["wallets"].items():
+            for code, balance in item['wallets'].items():
                 wallet = Wallet(code, Decimal(balance))
                 portfolio._wallets[code] = wallet
 
@@ -58,9 +59,9 @@ class PortfolioManager:
         for portfolio in self._portfolios.values():
             data.append(
                 {
-                    "user_id": portfolio._user_id,
-                    "wallets": {
-                        code: str(wallet._balance)
+                    'user_id': portfolio._user_id,
+                    'wallets': {
+                        code: format_balance(wallet._balance)
                         for code, wallet in portfolio._wallets.items()
                     },
                 }
