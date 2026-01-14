@@ -15,4 +15,4 @@ def hash_password(password: str, salt: str) -> str:
 
 def format_balance(amount: Decimal) -> str:
     """Округляет Decimal до 2 знаков после точки и возвращает строку."""
-    return str(amount.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+    return str(amount.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP))

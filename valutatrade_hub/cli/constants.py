@@ -1,7 +1,4 @@
 INPUT_PROMT = 'valutatrade> '
-USERS_FILE = 'data/users.json'
-PORTFOLIOS_FILE = 'data/portfolios.json'
-RATES_FILE = 'data/rates.json'
 
 COMMAND_DESCRIPTIONS = {
     'register': 'Зарегистрироваться',

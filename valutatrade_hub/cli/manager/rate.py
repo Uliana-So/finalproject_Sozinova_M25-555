@@ -1,33 +1,33 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import Dict
 
+from ...core.exceptions import ApiRequestError
 from ..storage import FileStorageManager
 
 
 class RateManager:
     """Менеджер курсов валют."""
 
-    def __init__(self, file_path: str):
+    def __init__(self, file_path: str, ttl: int):
         self._storage = FileStorageManager(file_path)
         self._rates: Dict[str, Dict[str, any]] = {}
+        self.ttl = ttl
         self.source: str = ""
         self.last_refresh: datetime | None = None
         self._load()
 
     def get_rate(self, from_currency: str, to_currency: str) -> Decimal:
         """Возвращает курс from_currency -> to_currency."""
-        if from_currency == to_currency:
-            return Decimal('1')
+        data = self._storage.load()
 
-        key = f'{from_currency}_{to_currency}'
-        if key not in self._rates:
-            raise ValueError(
-                f'Курс {from_currency}->{to_currency} недоступен. '
-                'Повторите попытку позже.'
-            )
+        last_refresh = datetime.fromisoformat(data["last_refresh"])
 
-        return Decimal(str(self._rates[key]['rate']))
+        if self._is_expired(last_refresh, self.ttl):
+            raise ApiRequestError("Курсы устарели")
+
+        key = f"{from_currency}_{to_currency}"
+        return data[key]
 
     def update_rate(self, from_currency: str, to_currency: str, rate: Decimal) -> None:
         """Обновляет курс и дату обновления."""
@@ -94,6 +94,9 @@ class RateManager:
                 'updated_at': value['updated_at'],
             }
 
+    def _is_expired(last_refresh: datetime, ttl: int) -> bool:
+        return datetime.utcnow() - last_refresh > timedelta(seconds=ttl)
+    
     def __str__(self) -> str:
         lines = [f'Курс (источник: {self.source}, обновлено: {self.last_refresh}):']
         for key, value in self._rates.items():

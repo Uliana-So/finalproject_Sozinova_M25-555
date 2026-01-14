@@ -1,9 +1,18 @@
 from decimal import Decimal, InvalidOperation
 
 from ..cli.manager.rate import RateManager
+from ..infra.settings import SettingsLoader
+from ..core.decorators import log_action
+from .currencies import get_currency
+from .exceptions import ApiRequestError, CurrencyNotFoundError
 from .models.portfolio import Portfolio
 
+settings = SettingsLoader()
 
+BASE_CURRENCY = settings.get("default_base_currency", "USD")
+
+
+@log_action("BUY", verbose=True)
 def buy_currency(
     portfolio: Portfolio,
     rate_manager: RateManager,
@@ -41,6 +50,7 @@ def buy_currency(
     )
 
 
+@log_action("SELL", verbose=True)
 def sell_currency(
     portfolio: Portfolio,
     rate_manager: RateManager,
@@ -63,7 +73,7 @@ def sell_currency(
 
     wallet = portfolio.get_wallet(currency)
     if not wallet:
-        raise ValueError(f'Кошелёк {currency} не найден')
+        raise CurrencyNotFoundError(currency)
 
     wallet.withdraw(amount)
 
@@ -82,3 +92,22 @@ def sell_currency(
         )
 
     return f'Продано {amount} {currency}'
+
+
+def get_rate(from_code: str, to_code: str, rate_manager):
+    from_currency = get_currency(from_code)
+    to_currency = get_currency(to_code)
+
+    settings = SettingsLoader()
+    ttl = settings.get("RATES_TTL_SECONDS")
+
+    rate = rate_manager.get_rate(from_currency.code, to_currency.code)
+
+    if rate.is_expired(ttl):
+        try:
+            rate_manager.refresh()  # заглушка / API
+            rate = rate_manager.get_rate(from_currency.code, to_currency.code)
+        except Exception as exc:
+            raise ApiRequestError(str(exc))
+
+    return rate

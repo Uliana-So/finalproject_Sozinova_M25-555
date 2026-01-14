@@ -1,6 +1,8 @@
 from decimal import Decimal
 from typing import Dict
 
+from ..exceptions import InsufficientFundsError
+
 
 class Wallet:
 
@@ -28,7 +30,7 @@ class Wallet:
     def withdraw(self, amount: Decimal) -> None:
         self._check_amount(amount)
         if amount > self._balance:
-            raise ValueError(f'Недостаточно средств. Доступно {self._balance}')
+            raise InsufficientFundsError(self._balance, self._currency_code)
         self._balance -= amount
 
     def get_balance_info(self) -> Dict:

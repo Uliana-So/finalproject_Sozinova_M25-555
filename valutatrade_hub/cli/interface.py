@@ -1,25 +1,29 @@
 import shlex
 
+from valutatrade_hub.infra.settings import SettingsLoader
+
 from ..core.usecases import buy_currency, sell_currency
 from .constants import (
     COMMAND_DESCRIPTIONS,
     INPUT_PROMT,
-    PORTFOLIOS_FILE,
-    RATES_FILE,
-    USERS_FILE,
 )
 from .manager.portfolio import PortfolioManager
 from .manager.rate import RateManager
 from .manager.user import UserManager
+
+settings = SettingsLoader()
 
 
 class CLIInterface:
 
     def __init__(self) -> None:
         self._user = None
-        self.user_manager = UserManager(USERS_FILE)
-        self.portfolio_manager = PortfolioManager(PORTFOLIOS_FILE)
-        self.rate_manager = RateManager(RATES_FILE)
+        self.user_manager = UserManager(settings.get("users_file"))
+        self.portfolio_manager = PortfolioManager(settings.get("portfolios_file"))
+        self.rate_manager = RateManager(
+            settings.get("rates_file"),
+            ttl=settings.get("rates_ttl_seconds")
+        )
 
     def run(self) -> None:
         self.show_help()
