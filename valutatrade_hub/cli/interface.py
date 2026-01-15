@@ -2,7 +2,14 @@ import shlex
 
 from valutatrade_hub.infra.settings import SettingsLoader
 
+from ..core.exceptions import (
+    ApiRequestError,
+    CurrencyNotFoundError,
+    InsufficientFundsError,
+)
 from ..core.usecases import buy_currency, sell_currency
+from ..parser.config import ParserConfig
+from ..parser.updater import RateUpdater
 from .constants import (
     COMMAND_DESCRIPTIONS,
     INPUT_PROMT,
@@ -24,6 +31,7 @@ class CLIInterface:
             settings.get("rates_file"),
             ttl=settings.get("rates_ttl_seconds")
         )
+        self.rate_updater = RateUpdater(ParserConfig.EXCHANGE_FILE_PATH)
 
     def run(self) -> None:
         self.show_help()
@@ -32,7 +40,13 @@ class CLIInterface:
             try:
                 user_input = input(INPUT_PROMT).strip()
                 self.proses_command(user_input)
-            except (ValueError, PermissionError) as e:
+            except (
+                ValueError,
+                PermissionError,
+                InsufficientFundsError,
+                CurrencyNotFoundError,
+                ApiRequestError,
+            ) as e:
                 print('\033[3m\033[31m{}\033[0m'.format(e))
             except (KeyboardInterrupt, EOFError):
                 break
@@ -100,6 +114,21 @@ class CLIInterface:
                         'get-rate --from <CURRENCY> --to <CURRENCY>'
                     )
 
+            case 'update-rates':
+                print(cmd)
+                if len(cmd) == 3 and cmd[1] == '--source':
+                    self.update_rates(cmd[2])
+                elif len(cmd) == 1:
+                    self.update_rates()
+                else:
+                    raise ValueError(
+                        'Неверный формат команды.\nИспользование: '
+                        'update-rates --source <SOURCE>'
+                    )
+
+            case 'show-rates':
+                pass
+
             case 'help':
                 self.show_help()
 
@@ -161,6 +190,14 @@ class CLIInterface:
     def get_rate(self, from_currency, to_currency) -> None:
         rate = self.rate_manager.format_rate(from_currency, to_currency)
         print(rate)
+
+    def update_rates(self, source: str | None = None):
+        rates = self.rate_updater.run_update(source)
+        self.rate_manager.update(
+            rates=rates,
+            source="",
+        )
+        print(f"Курсы успешно обновлены. Обновлено пар: {len(rates)}")
 
     def show_help(self) -> None:
         print('\tДоступные команды:')

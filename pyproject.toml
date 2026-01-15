@@ -11,6 +11,7 @@ packages = [
 [tool.poetry.dependencies]
 python = ">=3.12,<3.13"
 asciinema = "^2.4.0"
+requests = "^2.32.5"
 
 [tool.poetry.scripts]
 valutatrade = "valutatrade_hub.main:main" 

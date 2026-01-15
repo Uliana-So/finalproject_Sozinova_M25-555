@@ -3,7 +3,6 @@ from ..core.models.currency import (
     Currency,
     FiatCurrency,
 )
-
 from .exceptions import CurrencyNotFoundError
 
 _CURRENCY_REGISTRY: dict[str, Currency] = {

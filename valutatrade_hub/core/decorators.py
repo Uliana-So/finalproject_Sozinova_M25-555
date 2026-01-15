@@ -12,7 +12,7 @@ def log_action(action: str, verbose: bool = False):
         @wraps(func)
         def wrapper(*args, **kwargs):
             context = {}
-
+            print(">>>>", kwargs)
             context["action"] = action
             context["user"] = getattr(kwargs.get("user"), "username", None)
             context["currency"] = kwargs.get("currency")

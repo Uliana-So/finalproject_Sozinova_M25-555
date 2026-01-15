@@ -63,8 +63,8 @@ class Portfolio:
                 rate_info = 'без конвертации'
             else:
                 rate = rate_manager.get_rate(currency, base_currency)
-                converted = amount * rate
-                rate_info = f'курс {currency}->{base_currency}: {rate}'
+                converted = amount * Decimal(rate['rate'])
+                rate_info = f'курс {currency}->{base_currency}: {rate["rate"]} от {rate['updated_at']}'
 
             total += converted
 

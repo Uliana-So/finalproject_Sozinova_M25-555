@@ -11,39 +11,38 @@ class RateManager:
 
     def __init__(self, file_path: str, ttl: int):
         self._storage = FileStorageManager(file_path)
+        self._ttl = ttl
         self._rates: Dict[str, Dict[str, any]] = {}
-        self.ttl = ttl
         self.source: str = ""
         self.last_refresh: datetime | None = None
         self._load()
 
     def get_rate(self, from_currency: str, to_currency: str) -> Decimal:
         """Возвращает курс from_currency -> to_currency."""
-        data = self._storage.load()
-
-        last_refresh = datetime.fromisoformat(data["last_refresh"])
-
-        if self._is_expired(last_refresh, self.ttl):
-            raise ApiRequestError("Курсы устарели")
-
+        self.is_expired()
         key = f"{from_currency}_{to_currency}"
-        return data[key]
+        return self._rates[key]
 
-    def update_rate(self, from_currency: str, to_currency: str, rate: Decimal) -> None:
+    def update(self, rates: dict[str, Decimal], source: str) -> None:
         """Обновляет курс и дату обновления."""
-        key = f'{from_currency}_{to_currency}'
-        self._rates[key] = {
-            'rate': rate,
-            'updated_at': datetime.now().isoformat(),
-        }
-        self.last_refresh = datetime.now()
+        self.source = source
 
-    def save(self, source: str = 'Unknown') -> None:
+        for pair, rate in rates.items():
+            self._rates[pair] = {
+                "rate": float(rate),
+                "updated_at": datetime.now().isoformat(),
+            }
+
+        self.save()
+
+    def save(self, source: str = 'ParserService') -> None:
         """Сохраняет текущие курсы в файл."""
         data = {k: v for k, v in self._rates.items()}
         data['source'] = source
-        data['last_refresh'] = self.last_refresh.isoformat() if self.last_refresh else datetime.now().isoformat()
+        data['last_refresh'] = datetime.now().isoformat()
         self._storage.save(data)
+        self.last_refresh = datetime.now()
+        self.source = data['source']
 
     def get_rate_pair(self, from_currency: str, to_currency: str) -> dict:
         """Возвращает прямой и обратный курс."""
@@ -94,8 +93,10 @@ class RateManager:
                 'updated_at': value['updated_at'],
             }
 
-    def _is_expired(last_refresh: datetime, ttl: int) -> bool:
-        return datetime.utcnow() - last_refresh > timedelta(seconds=ttl)
+    def is_expired(self):
+        elapsed_seconds = (datetime.now() - self.last_refresh).total_seconds()
+        if elapsed_seconds > self._ttl:
+            raise ApiRequestError("Курсы устарели. Необходимо обновить")
     
     def __str__(self) -> str:
         lines = [f'Курс (источник: {self.source}, обновлено: {self.last_refresh}):']

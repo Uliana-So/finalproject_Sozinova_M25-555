@@ -5,7 +5,7 @@ class InsufficientFundsError(Exception):
 
         super().__init__(
             f'Недостаточно средств: '
-            f'доступно {available} {code}, '
+            f'доступно {available} {code}'
         )
 
 

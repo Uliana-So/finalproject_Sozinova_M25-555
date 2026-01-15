@@ -28,9 +28,7 @@ class Currency(ABC):
 
     @abstractmethod
     def get_display_info(self) -> str:
-        """
-        Строковое представление валюты для UI/логов.
-        """
+        """Строковое представление валюты для UI/логов."""
         pass
 
 
