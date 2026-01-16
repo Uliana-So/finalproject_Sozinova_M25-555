@@ -1,6 +1,7 @@
 from decimal import Decimal
 from typing import Dict
 
+from ..currencies import Currency, get_currency
 from ..exceptions import InsufficientFundsError
 
 
@@ -12,7 +13,7 @@ class Wallet:
         currency_code: str = "USD",
         balance: Decimal = Decimal("0")
     ) -> None:
-        self._currency_code = currency_code
+        self._currency_code: Currency = get_currency(currency_code)
         self._balance = balance
 
     @property
@@ -36,6 +37,6 @@ class Wallet:
     def get_balance_info(self) -> Dict:
         """Возвращает информацию о кошельке."""
         return {
-            "currency_code": self._currency_code,
+            "currency_code": self._currency_code.code,
             "balance": self._balance
         }

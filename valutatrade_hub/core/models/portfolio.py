@@ -54,14 +54,14 @@ class Portfolio:
                 converted = amount
                 rate_info = "без конвертации"
             else:
-                rate = rate_manager.get_rate(currency, base_currency)
-                converted = amount / Decimal(str(rate["rate"]))
-                rate_info = f"курс {currency}->{base_currency}: {rate["rate"]}"
+                rate = rate_manager.get_rate(currency.code, base_currency)
+                converted = amount * Decimal(str(rate["rate"]))
+                rate_info = f"курс {base_currency}->{currency.code}: {rate["rate"]:.4f}"
 
             total += converted
 
             lines.append(
-                f"- {currency}: {amount:.2f} -> {converted:.2f} "
+                f"- {currency.code}: {amount:.2f} -> {converted:.2f} "
                 f"{base_currency} ({rate_info})"
             )
 

@@ -2,6 +2,7 @@ from decimal import Decimal, InvalidOperation
 from typing import Dict, Optional
 
 from ...cli.manager.rate import RateManager
+from ...core.currencies import get_currency
 from ...core.decorators import log_action
 from ...core.exceptions import CurrencyNotFoundError
 from ...core.models.portfolio import Portfolio
@@ -51,8 +52,7 @@ class PortfolioManager:
         base_currency: str,
     ) -> Dict:
         """Покупает валюту и возвращает изменения баланса в кошельке."""
-        if not currency.isalpha() or len(currency) != 3:
-            raise ValueError(f"Неверный код валюты '{currency}'")
+        currency_obj = get_currency(currency)
 
         try:
             amount = Decimal(amount)
@@ -62,17 +62,16 @@ class PortfolioManager:
         if amount <= 0:
             raise ValueError("amount должен быть больше 0")
 
-        currency = currency.upper()
         rate_manager.is_expired()
         portfolio = self.get_by_user_id(user_id)
 
-        if not portfolio.get_wallet(currency):
-            portfolio.add_currency(currency)
+        if not portfolio.get_wallet(currency_obj.code):
+            portfolio.add_currency(currency_obj.code)
 
-        wallet = portfolio.get_wallet(currency)
+        wallet = portfolio.get_wallet(currency_obj.code)
         old_balance = wallet.balance
         wallet.deposit(amount)
-        rate = rate_manager.get_rate(currency, base_currency)
+        rate = rate_manager.get_rate(currency_obj.code, base_currency)
 
         self.save()
         return {
@@ -91,8 +90,7 @@ class PortfolioManager:
         base_currency: str,
     ) -> Dict:
         """Продает валюту и возвращает изменения баланса в кошельке."""
-        if not currency or not currency.isalpha() or len(currency) != 3:
-            raise ValueError(f"Неверный код валюты {currency}")
+        currency_obj = get_currency(currency)
 
         try:
             amount = Decimal(amount)
@@ -102,17 +100,16 @@ class PortfolioManager:
         if amount <= 0:
             raise ValueError("amount должен быть больше 0")
 
-        currency = currency.upper()
         rate_manager.is_expired()
         portfolio = self.get_by_user_id(user_id)
-        wallet = portfolio.get_wallet(currency)
+        wallet = portfolio.get_wallet(currency_obj.code)
 
         if not wallet:
-            raise CurrencyNotFoundError(currency)
+            raise CurrencyNotFoundError(currency_obj.code)
 
         old_balance = wallet.balance
         wallet.withdraw(amount)
-        rate = rate_manager.get_rate(currency, base_currency)
+        rate = rate_manager.get_rate(currency_obj.code, base_currency)
 
         self.save()
         return {

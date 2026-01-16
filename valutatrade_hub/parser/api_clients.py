@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from decimal import Decimal
 
 import requests
 
@@ -72,5 +73,6 @@ class ExchangeRateApiClient(BaseApiClient):
         # Приводим к стандартному формату {"EUR_USD": 1.0786, "BTC_USD": 59337.21}
         result = {}
         for code, rate in rates.items():
-            result[f"{code.upper()}_{self.base_currency}"] = rate
+            result[f"{code.upper()}_{self.base_currency}"] = \
+                float(Decimal("1") / Decimal(str(rate)))
         return result
