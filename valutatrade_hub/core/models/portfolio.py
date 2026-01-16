@@ -6,6 +6,7 @@ from .wallet import Wallet
 
 
 class Portfolio:
+    """Портфель пользователя - агрегатор всех валютных кошельков."""
     
     def __init__(self, user_id: int, wallets: Dict[str, Wallet] | None = None) -> None:
         self._user_id = user_id
@@ -16,61 +17,53 @@ class Portfolio:
         return self._user_id
 
     @property
-    def wallets(self) -> int:
+    def wallets(self) -> Dict[str, Wallet]:
         return self._wallets.copy()
     
     def add_currency(self, currency_code: str) -> None:
+        """Добавление пользователю кошелька."""
         if self._wallets.get(currency_code, None):
             raise ValueError(
-                f'У пользователя уже есть кошелек с валютой {currency_code}.'
+                f"У пользователя уже есть кошелек с валютой '{currency_code}'."
             )
 
         self._wallets[currency_code] = Wallet(currency_code)
 
-    def get_total_value(
-        self,
-        rate_manager: RateManager,
-        base_currency: str = 'USD'
-    ) -> Decimal:
-        total = Decimal('0')
-
-        for wallet in self._wallets.values():
-            rate = rate_manager.get_rate(wallet.currency_code, base_currency)
-            total += wallet.balance * rate.rate
-        return total
-
     def get_wallet(self, currency_code: str):
+        """Возвращает кошелек."""
         return self._wallets.get(currency_code, None)
 
     def format_portfolio(
         self,
         username: str,
         rate_manager: RateManager,
-        base_currency: str = 'USD'
+        base_currency: str
     ) -> str:
-        if not self._wallets:
-            return 'Портфель пуст.'
+        """Возвращает строку с полной информацией по портфелю."""
+        if not self.wallets:
+            return "Портфель пуст."
 
-        lines = [f'Портфель пользователя {username} (валюта: {base_currency}):']
-        total = Decimal('0')
+        lines = [f"Портфель пользователя {username} (валюта: {base_currency}):"]
+        total = Decimal("0")
 
-        for wallet in self._wallets.values():
+        for wallet in self.wallets.values():
             amount = wallet.balance
             currency = wallet._currency_code
 
             if currency == base_currency:
                 converted = amount
-                rate_info = 'без конвертации'
+                rate_info = "без конвертации"
             else:
                 rate = rate_manager.get_rate(currency, base_currency)
-                converted = amount * Decimal(rate['rate'])
-                rate_info = f'курс {currency}->{base_currency}: {rate["rate"]} от {rate['updated_at']}'
+                converted = amount / Decimal(str(rate["rate"]))
+                rate_info = f"курс {currency}->{base_currency}: {rate["rate"]}"
 
             total += converted
 
             lines.append(
-                f'- {currency}: {amount:.2f} -> {converted:.2f} {base_currency} ({rate_info})'
+                f"- {currency}: {amount:.2f} -> {converted:.2f} "
+                f"{base_currency} ({rate_info})"
             )
 
-        lines.append(f'\nИтого: {total:.2f} {base_currency}')
+        lines.append(f"\nИтого: {total:.2f} {base_currency}")
         return "\n".join(lines)

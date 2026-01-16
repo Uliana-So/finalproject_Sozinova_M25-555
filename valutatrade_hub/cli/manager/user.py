@@ -28,21 +28,21 @@ class UserManager:
     def create(self, username: str, password: str) -> User:
         """Создаёт и добавляет нового пользователя."""
         if self.get_by_username(username):
-            raise ValueError(f'Имя пользователя {username} уже занято.')
+            raise ValueError(f"Имя пользователя {username} уже занято.")
 
         if len(password) < 4:
-            raise ValueError('Пароль должен быть не короче 4 символов.')
+            raise ValueError("Пароль должен быть не короче 4 символов.")
 
         user_id = self._generate_user_id()
         salt = generate_salt()
         hashed_password = hash_password(password, salt)
 
         user = User(
-            user_id=user_id,
-            username=username,
-            hashed_password=hashed_password,
-            salt=salt,
-            registration_date=datetime.now(),
+            user_id,
+            username,
+            hashed_password,
+            salt,
+            datetime.now(),
         )
 
         self._users.append(user)
@@ -50,22 +50,23 @@ class UserManager:
         return user
 
     def save(self) -> None:
-        """Сохраняет текущее состояние в файл."""
+        """Сохраняет текущее состояние в файл users.json"""
         self._storage.save(self._serialize())
 
     def authenticate(self, username: str, password: str) -> User:
         """Аутентификация пользователя."""
         user = self.get_by_username(username)
         if user is None:
-            raise ValueError('Неверный логин или пароль.')
+            raise ValueError("Неверный логин или пароль.")
 
         hashed_input = hash_password(password, user._salt)
         if hashed_input != user._hashed_password:
-            raise ValueError('Неверный логин или пароль.')
+            raise ValueError("Неверный логин или пароль.")
 
         return user
 
     def _load(self) -> None:
+        """Загружает файл users.json"""
         raw_users = self._storage.load()
         for data in raw_users:
             self._users.append(self._deserialize(data))
@@ -78,23 +79,21 @@ class UserManager:
     @staticmethod
     def _deserialize(data: dict) -> User:
         return User(
-            user_id=data['user_id'],
-            username=data['username'],
-            hashed_password=data['hashed_password'],
-            salt=data['salt'],
-            registration_date=datetime.fromisoformat(
-                data['registration_date']
-            ),
+            data["user_id"],
+            data["username"],
+            data["hashed_password"],
+            data["salt"],
+            datetime.fromisoformat(data["registration_date"]),
         )
 
     def _serialize(self) -> list[dict]:
         return [
             {
-                'user_id': user._user_id,
-                'username': user._username,
-                'hashed_password': user._hashed_password,
-                'salt': user._salt,
-                'registration_date': user._registration_date.isoformat(),
+                "user_id": user._user_id,
+                "username": user._username,
+                "hashed_password": user._hashed_password,
+                "salt": user._salt,
+                "registration_date": user._registration_date.isoformat(),
             }
             for user in self._users
         ]

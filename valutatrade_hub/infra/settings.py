@@ -24,7 +24,8 @@ class SettingsLoader:
             "portfolios_file": "data/portfolios.json",
             "rates_file": "data/rates.json",
             "rates_ttl_seconds": 300,       # TTL курсов в секундах
-            "logs_path": "logs/actions.log" # путь к логам
+            "logs_path": "logs/actions.log", # путь к логам
+            "base_currency": "USD",
         }
 
     def get(self, key: str, default: Any = None) -> Any:

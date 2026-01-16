@@ -21,14 +21,12 @@ class BaseApiClient(ABC):
 class CoinGeckoClient(BaseApiClient):
     BASE_URL = ParserConfig.COINGECKO_URL
 
-    def __init__(self, vs_currencies: list[str] = None):
-        if vs_currencies is None:
-            vs_currencies = ["usd"]
-        self.vs_currencies = ",".join([c.lower() for c in vs_currencies])
-
+    def __init__(self, base_currency: str = "USD"):
+        self.base_currency = base_currency.upper()
+    
     def fetch_rates(self) -> dict:
         ids = ",".join(ParserConfig.CRYPTO_ID_MAP.values())
-        url = f"{self.BASE_URL}?ids={ids}&vs_currencies={self.vs_currencies}"
+        url = f"{self.BASE_URL}?ids={ids}&vs_currencies={self.base_currency}"
 
         try:
             response = requests.get(url, timeout=10)
@@ -41,7 +39,7 @@ class CoinGeckoClient(BaseApiClient):
         # Приводим к стандартному формату {"BTC_USD": 59337.21}
         result = {}
         for code, coin_id in ParserConfig.CRYPTO_ID_MAP.items():
-            for vs in self.vs_currencies.upper().split(","):
+            for vs in self.base_currency.upper().split(","):
                 rate = data.get(coin_id, {}).get(vs.lower())
                 if rate is not None:
                     result[f"{code}_{vs.upper()}"] = rate

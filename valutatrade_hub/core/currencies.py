@@ -6,26 +6,26 @@ from ..core.models.currency import (
 from .exceptions import CurrencyNotFoundError
 
 _CURRENCY_REGISTRY: dict[str, Currency] = {
-    'USD': FiatCurrency(
-        name='US Dollar',
-        code='USD',
-        issuing_country='United States',
+    "USD": FiatCurrency(
+        name="US Dollar",
+        code="USD",
+        issuing_country="United States",
     ),
-    'EUR': FiatCurrency(
-        name='Euro',
-        code='EUR',
-        issuing_country='Eurozone',
+    "EUR": FiatCurrency(
+        name="Euro",
+        code="EUR",
+        issuing_country="Eurozone",
     ),
-    'BTC': CryptoCurrency(
-        name='Bitcoin',
-        code='BTC',
-        algorithm='SHA-256',
+    "BTC": CryptoCurrency(
+        name="Bitcoin",
+        code="BTC",
+        algorithm="SHA-256",
         market_cap=1.12e12,
     ),
-    'ETH': CryptoCurrency(
-        name='Ethereum',
-        code='ETH',
-        algorithm='Ethash',
+    "ETH": CryptoCurrency(
+        name="Ethereum",
+        code="ETH",
+        algorithm="Ethash",
         market_cap=4.5e11,
     ),
 }

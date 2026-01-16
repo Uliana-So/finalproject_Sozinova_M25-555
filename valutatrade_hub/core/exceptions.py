@@ -4,20 +4,35 @@ class InsufficientFundsError(Exception):
         self.code = code
 
         super().__init__(
-            f'Недостаточно средств: '
-            f'доступно {available} {code}'
+            f"Недостаточно средств: "
+            f"доступно {available} {code}"
         )
 
 
 class CurrencyNotFoundError(Exception):
     def __init__(self, code: str):
         self.code = code
-        super().__init__(f'Неизвестная валюта {code}')
+        super().__init__(f"Неизвестная валюта {code}")
 
 
 class ApiRequestError(Exception):
     def __init__(self, reason: str):
         self.reason = reason
         super().__init__(
-            f'Ошибка при обращении к внешнему API: {reason}'
+            f"Ошибка при обращении к внешнему API: {reason}"
+        )
+
+
+class RatesExpiredError(Exception):
+    def __init__(self):
+        super().__init__(
+            "Курсы валют устарели. Необходимо обновить данные."
+        )
+
+
+class InvalidCommandFormatError(Exception):
+    def __init__(self, cmd: str) -> None:
+        super().__init__(
+            f"Неверная команда: {cmd}\n"
+            "Введите 'help' для просмотра списка команд и примеров."
         )

@@ -5,11 +5,12 @@ from ..exceptions import InsufficientFundsError
 
 
 class Wallet:
+    """Кошелек пользователя для одной валюты."""
 
     def __init__(
         self,
-        currency_code: str = 'USD',
-        balance: Decimal = Decimal('0')
+        currency_code: str = "USD",
+        balance: Decimal = Decimal("0")
     ) -> None:
         self._currency_code = currency_code
         self._balance = balance
@@ -20,26 +21,21 @@ class Wallet:
 
     @balance.setter
     def balance(self, balance: Decimal) -> None:
-        self._check_amount(balance)
         self._balance = balance
 
     def deposit(self, amount: Decimal) -> None:
-        self._check_amount(amount)
+        """Пополнение кошелька."""
         self._balance += amount
 
     def withdraw(self, amount: Decimal) -> None:
-        self._check_amount(amount)
+        """Снятие средств с кошелька."""
         if amount > self._balance:
             raise InsufficientFundsError(self._balance, self._currency_code)
         self._balance -= amount
 
     def get_balance_info(self) -> Dict:
+        """Возвращает информацию о кошельке."""
         return {
-            'currency_code': self._currency_code,
-            'balance': self._balance
+            "currency_code": self._currency_code,
+            "balance": self._balance
         }
-    
-    @staticmethod
-    def _check_amount(amount: Decimal) -> None:
-        if amount <= Decimal('0'):
-            raise ValueError('Баланс не может быть меньше 0.')

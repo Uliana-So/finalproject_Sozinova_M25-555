@@ -12,14 +12,12 @@ class RateUpdater:
     def __init__(self, file_path: str):
         self._storage = FileStorageManager(file_path)
         self._clients = {
-            "CoinGecko": CoinGeckoClient(vs_currencies=[ParserConfig.BASE_CURRENCY]),
-            "ExchangeRate-API": ExchangeRateApiClient(base_currency=ParserConfig.BASE_CURRENCY)
+            "CoinGecko": CoinGeckoClient(ParserConfig.BASE_CURRENCY),
+            "ExchangeRate-API": ExchangeRateApiClient(ParserConfig.BASE_CURRENCY)
         }
 
     def run_update(self, source: str | None = None) -> int:
-        """
-        Обновляет курсы. Если source указан — обновляет только его.
-        """
+        """Обновляет курсы. Если source указан — обновляет только его."""
         collected: Dict[str, Decimal] = {}
         
         if source and source not in self._clients.keys():
@@ -46,6 +44,7 @@ class RateUpdater:
                 )
 
                 collected[pair] = rate_decimal
+            print(f"Обновлены курсы из {name}: {len(rates)}")
 
         return collected
 

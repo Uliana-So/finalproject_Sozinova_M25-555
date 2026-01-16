@@ -1,23 +1,30 @@
 import logging
 from functools import wraps
+from inspect import signature
 
 logger = logging.getLogger(__name__)
 
 def log_action(action: str, verbose: bool = False):
-    """
-    Декоратор для логирования бизнес-операций.
-    """
+    """Декоратор для логирования бизнес-операций."""
 
     def decorator(func):
+        sig = signature(func)
+
         @wraps(func)
         def wrapper(*args, **kwargs):
-            context = {}
-            print(">>>>", kwargs)
-            context["action"] = action
-            context["user"] = getattr(kwargs.get("user"), "username", None)
-            context["currency"] = kwargs.get("currency")
-            context["amount"] = kwargs.get("amount")
-            context["base"] = kwargs.get("base_currency")
+            bound = sig.bind_partial(*args, **kwargs)
+            bound.apply_defaults()
+
+            params = bound.arguments
+
+            context = {
+                "action": action,
+                "user": getattr(params.get("user"), "username", None)
+                        or params.get("user_id"),
+                "currency": params.get("currency"),
+                "amount": params.get("amount"),
+                "base": params.get("base_currency"),
+            }
 
             try:
                 result = func(*args, **kwargs)
@@ -30,7 +37,6 @@ def log_action(action: str, verbose: bool = False):
                     context["amount"],
                     context["base"],
                 )
-
                 return result
 
             except Exception as exc:

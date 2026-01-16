@@ -13,10 +13,10 @@ class FileStorageManager:
         if not self._file_path:
             return []
 
-        with open(self._file_path, 'r', encoding='utf-8') as f:
+        with open(self._file_path, "r", encoding="utf-8") as f:
             return json.load(f)
 
     def save(self, data: List[Dict[str, Any]]) -> None:
-        """Сохраняет в файл."""
-        with open(self._file_path, 'w', encoding='utf-8') as f:
+        """Сохраняет данные в файл."""
+        with open(self._file_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=4, ensure_ascii=False)
