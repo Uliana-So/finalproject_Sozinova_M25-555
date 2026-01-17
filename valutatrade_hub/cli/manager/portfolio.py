@@ -57,10 +57,10 @@ class PortfolioManager:
         try:
             amount = Decimal(amount)
         except InvalidOperation:
-            raise ValueError("amount должен быть числом")
+            raise ValueError("Количество должен быть числом")
 
         if amount <= 0:
-            raise ValueError("amount должен быть больше 0")
+            raise ValueError("Количество должен быть больше 0")
 
         rate_manager.is_expired()
         portfolio = self.get_by_user_id(user_id)
@@ -95,10 +95,10 @@ class PortfolioManager:
         try:
             amount = Decimal(amount)
         except InvalidOperation:
-            raise ValueError("amount должен быть числом")
+            raise ValueError("Количество должен быть числом")
 
         if amount <= 0:
-            raise ValueError("amount должен быть больше 0")
+            raise ValueError("Количество должен быть больше 0")
 
         rate_manager.is_expired()
         portfolio = self.get_by_user_id(user_id)

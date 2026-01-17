@@ -31,7 +31,7 @@ class Wallet:
     def withdraw(self, amount: Decimal) -> None:
         """Снятие средств с кошелька."""
         if amount > self._balance:
-            raise InsufficientFundsError(self._balance, self._currency_code)
+            raise InsufficientFundsError(self._balance, self._currency_code.code)
         self._balance -= amount
 
     def get_balance_info(self) -> Dict:

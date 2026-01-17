@@ -1,4 +1,4 @@
-INPUT_PROMT = "valutatrade> "
+INPUT_PROMT = "\033[35mvalutatrade> \033[0m"
 
 COMMAND_DESCRIPTIONS = {
     "register": "Зарегистрироваться",
@@ -15,12 +15,10 @@ COMMAND_DESCRIPTIONS = {
 COMMAND_EXAMPLES = [
     "register --username <str> --password <str>",
     "login --username <str> --password <str>",
-    "show-portfolio --base <str>",
+    "show-portfolio [--base <str>]",
     "buy --currency <str> --amount <float>",
     "sell --currency <str> --amount <float>",
     "get-rate --from <str> --to <str>",
-    "update-rates --source <str>",
-    "show-rates --top <int>",
-    "show-rates --base <str>",
-    "show-rates --currency <str>",
+    "update-rates [--source <str>]",
+    "show-rates [--top <int>] [--base <str>] [--currency <str>]",
 ]

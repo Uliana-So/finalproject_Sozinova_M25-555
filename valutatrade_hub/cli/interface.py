@@ -127,9 +127,9 @@ class CLIInterface:
 
     def register(self, username: str, password: str) -> None:
         """Регистрация пользователя."""
-        self.user_manager.create(username, password)
-        print(f"Пользователь {self._user.username} зарегистрирован.")
-        self.portfolio_manager.create_portfolio(self._user.user_id)
+        new_user = self.user_manager.create(username, password)
+        print(f"Пользователь {new_user.username} зарегистрирован.")
+        self.portfolio_manager.create_portfolio(new_user.user_id)
 
     def login(self, username: str, password: str) -> None:
         """Аутентификация пользователя."""
@@ -162,7 +162,7 @@ class CLIInterface:
 
         print(
             f"Покупка выполнена: {amount} {currency} "
-            f"по курсу {result["rate"]} {base_currency}/{currency}\n"
+            f"по курсу {result["rate"]:.4f} {currency}/{base_currency}\n"
             f"Изменения в портфеле:\n"
             f"- {currency}: {result["old_balance"]} -> {result["new_balance"]}"
         )
@@ -182,7 +182,7 @@ class CLIInterface:
         )
         print(
             f"Продажа выполнена: {amount} {currency} "
-            f"по курсу {result["rate"]} {base_currency}/{currency}\n"
+            f"по курсу {result["rate"]:.4f} {currency}/{base_currency}\n"
             f"Изменения в портфеле:\n"
             f"- {currency}: {result["old_balance"]} -> {result["new_balance"]}"
         )
@@ -215,7 +215,7 @@ class CLIInterface:
         formatted = self.rate_manager.last_refresh.strftime("%d-%m-%Y %H:%M")
         print(f"Курсы валют из кэша (от {formatted}):")
         for r in rates:
-            print(f"- {r['pair']}: {r['rate']}")
+            print(f"- {r['pair']}: {r['rate']:.4f}")
 
     def show_help(self) -> None:
         """Отображает доступные команды и примеры их использования."""

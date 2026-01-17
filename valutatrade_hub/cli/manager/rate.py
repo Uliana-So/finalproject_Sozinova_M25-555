@@ -140,7 +140,7 @@ class RateManager:
 
             rates.append({
                 "pair": f"{from_code}_{base}",
-                "rate": rate_in_base.quantize(Decimal("0.01")),
+                "rate": rate_in_base,
                 "updated_at": info["updated_at"],
             })
 
