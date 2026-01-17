@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "finalproject-sozinova-m25-555"
 version = "0.1.0"
-description = ""
+description = "CLI app for managing users, portfolios, and currency rates with local JSON storage and logging."
 authors = ["Uliana Sozinova <uliana.so-dev@yandex.ru>"]
 readme = "README.md"
 packages = [
